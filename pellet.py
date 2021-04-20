@@ -4,16 +4,16 @@ class pellet:
         self.color = color
         self.coordinates = coordinates
 
-    def get_size(self):
+    def getSize(self):
         return self.size
 
-    def get_color(self):
+    def getColor(self):
         return self.color
 
-    def get_coordinates(self):
+    def getCoordinates(self):
         return self.coordinates
 
-    def check_overlap(self, minX, minY, maxX, maxY):
+    def checkOverlap(self, minX, minY, maxX, maxY):
         if self.coordinates[0] >= minX and self.coordinates[0] <= maxX:
             if self.coordinates[1] >= minY and self.coordinates[1] <= maxY:
                 return True

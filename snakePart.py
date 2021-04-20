@@ -1,3 +1,7 @@
+from pellet import *
+
+
+
 class snakePart:
     def __init__(self, size, color, coordinates, step=1, direction="up"):
         self.size = size
@@ -8,6 +12,12 @@ class snakePart:
 
     def getCoordinates(self):
         return self.coordinates
+
+    def getSize(self):
+        return self.size
+
+    def getColor(self):
+        return self.color
 
     def move(self, direction):
         if direction == "up":
@@ -67,16 +77,49 @@ class snakeHead:
         myMinY = self.coordinates[1] - self.size / 2
         myMaxX = self.coordinates[0] + self.size / 2
         myMaxY = self.coordinates[1] + self.size / 2
-        return [myMinX, myMinY]
+        return [myMinX, myMinY, myMaxX, myMaxY]
+
+
+    def oppositeDirection(self, direction):
+        if direction == 'up':
+            return 'down'
+        if direction == 'down':
+            return 'up'
+        if direction == 'left':
+            return 'right'
+        if direction == 'right':
+            return 'left'
+
+    def getCoordinates(self):
+        return self.coordinates
+
+    def getSize(self):
+        return self.size
+
+    def getParts(self):
+        return self.parts
+
+    def getColor(self):
+        return self.color
+
+    def getDirection(self):
+        return self.direction
+
+    def setDirection(self, newDirection):
+        if newDirection != self.oppositeDirection(self.direction):
+            self.direction = newDirection
 
 
     def checkOverlap(self, enemyHead):
-        enemyMinX = enemyHead.coordinates[0] - enemyHead.length * self.size
-        enemyMaxX = enemyHead.coordinates[0] + enemyHead.length * self.size
-        enemyMinY = enemyHead.coordinates[1] - enemyHead.length * self.size
-        enemyMaxY = enemyHead.coordinates[1] + enemyHead.length * self.size
+        enemyMinX = enemyHead.coordinates[0] - (enemyHead.length + 1) * enemyHead.size
+        enemyMaxX = enemyHead.coordinates[0] + (enemyHead.length + 1) * enemyHead.size
+        enemyMinY = enemyHead.coordinates[1] - (enemyHead.length + 1) * enemyHead.size
+        enemyMaxY = enemyHead.coordinates[1] + (enemyHead.length + 1) * enemyHead.size
         if self.coordinates[0] > enemyMinX and self.coordinates[0] < enemyMaxX and self.coordinates[1] > enemyMinY and self.coordinates[1] < enemyMaxY:
             head = self.getDimensions()
+            if enemyHead.length == 0:
+                return True
+
             for x in enemyHead.parts:
                 if x.checkOverlap(head[0], head[1], head[2], head[3]):
                     return True
@@ -114,9 +157,9 @@ class snakeHead:
             if x == 0:
                 if self.direction == "up" or self.direction == "down":
                     xVal = self.parts[x].getCoordinates()[0]
-                    if xVal == self.coordinates()[0]:
+                    if xVal == self.coordinates[0]:
                         self.parts[x].move(direction)
-                    elif xVal < self.coordinates()[0]:
+                    elif xVal < self.coordinates[0]:
                         self.parts[x].move("right")
                     else:
                         self.parts[x].move("left")
@@ -124,9 +167,9 @@ class snakeHead:
 
                 elif self.direction == "left" or self.direction == "right":
                     yVal = self.parts[x].getCoordinates()[1]
-                    if yVal == self.coordinates()[1]:
+                    if yVal == self.coordinates[1]:
                         self.parts[x].move(direction)
-                    elif yVal < self.coordinates()[1]:
+                    elif yVal < self.coordinates[1]:
                         self.parts[x].move("up")
                     else:
                         self.parts[x].move("down")
@@ -152,9 +195,9 @@ class snakeHead:
 
     def eat(self, pellet):
         dims = self.getDimensions()
-        if not pellet.check_overlap(dims[0],dims[1],dims[2],dims[3]):
+        if not pellet.checkOverlap(dims[0],dims[1],dims[2],dims[3]):
             return False
-        if self.color == pellet.get_color():
+        if self.color == pellet.getColor():
             self.points += 5
         else:
             self.points += 1
@@ -175,13 +218,13 @@ class snakeHead:
                 lastItem = self.parts[-1].getCoordinates()
                 lastDirection = self.parts[-1].getDirection()
             if lastDirection == "up":
-                newCoordinates = [lastItem[0], lastItem[1] - self.step]
+                newCoordinates = [lastItem[0], lastItem[1] - 0.75*self.size]
             elif lastDirection == "right":
-                newCoordinates = [lastItem[0] - self.step, lastItem[1]]
+                newCoordinates = [lastItem[0] - 0.75*self.size, lastItem[1]]
             elif lastDirection == "down":
-                newCoordinates = [lastItem[0], lastItem[1] + self.step]
+                newCoordinates = [lastItem[0], lastItem[1] + 0.75*self.size]
             else:
-                newCoordinates = [lastItem[0] + self.step, lastItem[1]]
+                newCoordinates = [lastItem[0] + 0.75*self.size, lastItem[1]]
 
-            self.parts.append(snakePart(self.size, self.color, newCoordinates, self.step, lastDirection))
+            self.parts.append(snakePart(0.75*self.size, self.color, newCoordinates, self.step, lastDirection))
             self.length += 1
