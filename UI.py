@@ -1,6 +1,6 @@
 import tkinter as tk
 from game import *
-import time
+from PIL import ImageTk, Image
 
 class UI:
 
@@ -8,11 +8,14 @@ class UI:
         self.windowSize = 1000
         self.window = tk.Tk()
         self.window.title("snake game")
-        self.frame1 = tk.Frame(master=self.window, width=200, bg="grey")
+        self.frame1 = tk.Frame(master=self.window, width=100, bg="grey")
         self.frame1.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
         self.frame2 = tk.Frame(master=self.window, width=1000, height=1000, bg="white")
         self.frame2.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
-        self.canvas = tk.Canvas(master=self.frame2)
+        self.size = tk.StringVar()
+        self.lengthLabel = tk.Label(master=self.frame1, textvariable=self.size)
+        self.lengthLabel.pack()
+        self.canvas = tk.Canvas(master=self.frame2, height=1000, width=1000)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.gameOver = False
         self.window.bind("<Key>", self.keyPressed)
@@ -23,7 +26,20 @@ class UI:
     def startGame(self):
         if self.gameOver == False:
             self.drawMap()
-            self.game.playGame()
+            self.gameOver = self.game.playGame()
+            self.size.set("Snake Length: " + str(self.game.getSnakes()[0].getLength()))
+            #self.size.set
+            self.window.after(1, self.startGame)
+
+        else:
+            popUpWindow = tk.Toplevel(self.window)
+            img = ImageTk.PhotoImage(Image.open('gameover.jpg'))
+            newCanvas = tk.Canvas(master=popUpWindow, width=626, height=626)
+            newCanvas.create_image(313,313, image=img)
+            newCanvas.pack()
+            popUpWindow.mainloop()
+            self.gameOver = False
+            self.game = game()
             self.window.after(1, self.startGame)
 
     def keyPressed(self, event):

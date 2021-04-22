@@ -8,14 +8,14 @@ class game:
         self.numSnakes = 0
         self.numPellets = 0
         self.gridLength = 10000
-        self.step = 5
+        self.step = 7
         self.gameOver = False
         self.directions = ["up", "right", "down", "left"]
         self.colors = ["blue", "red", "yellow", "lime green", "purple", "pink", "orange", "cyan"]
         self.snakeSize = 50
         self.pelletSize = 10
         self.minPellets = 5000
-        self.createSnake(5)
+        self.createSnake(10)
         self.createPellet(2*self.minPellets)
 
 

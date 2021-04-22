@@ -9,6 +9,9 @@ class snakePart:
         self.coordinates = coordinates
         self.step = step
         self.direction = direction
+        self.target = [0,0]
+        self.target[0] = coordinates[0]
+        self.target[1] = coordinates[1]
 
     def getCoordinates(self):
         return self.coordinates
@@ -38,6 +41,23 @@ class snakePart:
 
     def getDirection(self):
         return self.direction
+
+    def setDirection(self, direction):
+        self.direction = direction
+
+    def getTarget(self):
+        return self.target
+
+    def setTarget(self, target):
+        self.target[0] = target[0]
+        self.target[1] = target[1]
+
+    def setStep(self, step):
+        self.step = step
+
+    def setCoordinates(self, coordinates):
+        self.coordinates[0] = coordinates[0]
+        self.coordinates[1] = coordinates[1]
 
     def checkOverlap(self, minX, minY, maxX, maxY):
         myMinX = self.coordinates[0] - self.size / 2
@@ -96,6 +116,9 @@ class snakeHead:
     def getSize(self):
         return self.size
 
+    def getLength(self):
+        return self.length
+
     def getParts(self):
         return self.parts
 
@@ -126,6 +149,7 @@ class snakeHead:
         return False
 
     def move(self, direction):
+
         if direction == "up" and self.direction != "down":
             self.coordinates[1] += self.step
             self.direction = direction
@@ -152,46 +176,29 @@ class snakeHead:
                 self.coordinates[0] -= self.step
 
 
-
         for x in range(self.length):
-            if x == 0:
-                if self.direction == "up" or self.direction == "down":
-                    xVal = self.parts[x].getCoordinates()[0]
-                    if xVal == self.coordinates[0]:
-                        self.parts[x].move(direction)
-                    elif xVal < self.coordinates[0]:
-                        self.parts[x].move("right")
-                    else:
-                        self.parts[x].move("left")
-
-
-                elif self.direction == "left" or self.direction == "right":
-                    yVal = self.parts[x].getCoordinates()[1]
-                    if yVal == self.coordinates[1]:
-                        self.parts[x].move(direction)
-                    elif yVal < self.coordinates[1]:
-                        self.parts[x].move("up")
-                    else:
-                        self.parts[x].move("down")
-
-            elif self.direction == "up" or self.direction == "down":
-                xVal = self.parts[x].getCoordinates()[0]
-                if xVal == self.parts[x-1].getCoordinates()[0]:
-                    self.parts[x].move(direction)
-                elif xVal < self.parts[x-1].getCoordinates()[0]:
-                    self.parts[x].move("right")
+            C = self.parts[x].getCoordinates()
+            T = self.parts[x].getTarget()
+            if abs(C[0]-T[0]) < self.step and abs(C[1]-T[1]) < self.step:
+                self.parts[x].setCoordinates(T)
+                if x == 0:
+                    self.parts[x].setTarget(self.coordinates)
                 else:
-                    self.parts[x].move("left")
-
-
-            elif self.direction == "left" or self.direction == "right":
-                yVal = self.parts[x].getCoordinates()[1]
-                if yVal == self.parts[x-1].getCoordinates()[1]:
-                    self.parts[x].move(direction)
-                elif yVal < self.parts[x-1].getCoordinates()[1]:
-                    self.parts[x].move("up")
+                    self.parts[x].setTarget(self.parts[x-1].getCoordinates())
+                T = self.parts[x].getTarget()
+                if abs(C[0]-T[0]) < self.parts[x].getSize()/2 and abs(C[1]-T[1]) < self.parts[x].getSize()/2:
+                    self.parts[x].setStep(3)
                 else:
-                    self.parts[x].move("down")
+                    self.parts[x].setStep(self.step)
+            if C[0] < T[0]:
+                self.parts[x].move('right')
+            elif C[0] > T[0]:
+                self.parts[x].move('left')
+            elif C[1] < T[1]:
+                self.parts[x].move('up')
+            else:
+                self.parts[x].move('down')
+
 
     def eat(self, pellet):
         dims = self.getDimensions()
