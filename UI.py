@@ -13,13 +13,22 @@ class UI:
         self.frame2 = tk.Frame(master=self.window, width=1000, height=1000, bg="white")
         self.frame2.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
         self.size = tk.StringVar()
+        self.kills = tk.StringVar()
+        self.monch = tk.StringVar()
+        self.count = tk.StringVar()
         self.lengthLabel = tk.Label(master=self.frame1, textvariable=self.size)
         self.lengthLabel.pack()
+        self.pelletsLabel = tk.Label(master=self.frame1, textvariable=self.monch)
+        self.pelletsLabel.pack()
+        self.killsLabel = tk.Label(master=self.frame1, textvariable=self.kills)
+        self.killsLabel.pack()
+        self.countLabel = tk.Label(master=self.frame1, textvariable=self.count)
+        self.countLabel.pack()
         self.canvas = tk.Canvas(master=self.frame2, height=1000, width=1000)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.gameOver = False
         self.window.bind("<Key>", self.keyPressed)
-        self.game = game()
+        self.game = game(self.windowSize)
         self.startGame()
         self.window.mainloop()
 
@@ -28,8 +37,9 @@ class UI:
             self.drawMap()
             self.gameOver = self.game.playGame()
             self.size.set("Snake Length: " + str(self.game.getSnakes()[0].getLength()))
-            #self.size.set
-            self.window.after(1, self.startGame)
+            self.kills.set("Snakes Killed: " + str(self.game.getSnakesKilled()))
+            self.monch.set("Pellets Eaten: " + str(self.game.getPelletsEaten()))
+            self.count.set("Snakes Alive: " + str(self.game.getNumSnakes()))
 
         else:
             popUpWindow = tk.Toplevel(self.window)
@@ -37,10 +47,11 @@ class UI:
             newCanvas = tk.Canvas(master=popUpWindow, width=626, height=626)
             newCanvas.create_image(313,313, image=img)
             newCanvas.pack()
-            popUpWindow.mainloop()
+            self.window.wait_window(popUpWindow)
             self.gameOver = False
-            self.game = game()
-            self.window.after(1, self.startGame)
+            self.game.restartGame()
+
+        self.window.after(1, self.startGame)
 
     def keyPressed(self, event):
         if event.keysym_num == 65364:  #up

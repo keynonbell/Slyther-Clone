@@ -22,6 +22,9 @@ class snakePart:
     def getColor(self):
         return self.color
 
+    def getStep(self):
+        return self.step
+
     def move(self, direction):
         if direction == "up":
             self.coordinates[1] += self.step
@@ -82,15 +85,17 @@ class snakePart:
 
 
 class snakeHead:
-    def __init__(self, size, color, coordinates, step=1, direction='up'):
+    def __init__(self, size, color, coordinates, step=1, direction='up', length=0):
         self.size = size
         self.color = color
         self.coordinates = coordinates
         self.step = step
         self.direction = direction
         self.parts = []
-        self.length = 0
+        self.length = length
         self.points = 0
+        if self.length != 0:
+            self.grow(self.length)
 
     def getDimensions(self):
         myMinX = self.coordinates[0] - self.size / 2
@@ -148,56 +153,52 @@ class snakeHead:
                     return True
         return False
 
-    def move(self, direction):
+    def move(self):
 
-        if direction == "up" and self.direction != "down":
+        if self.direction == "up":
             self.coordinates[1] += self.step
-            self.direction = direction
-
-        elif direction == "right" and self.direction != "left":
+        elif self.direction == "right":
             self.coordinates[0] += self.step
-            self.direction = direction
-
-        elif direction == "down" and self.direction != "up":
+        elif self.direction == "down":
             self.coordinates[1] -= self.step
-            self.direction = direction
-
-        elif direction == "left" and self.direction != "right":
+        elif self.direction == "left":
             self.coordinates[0] -= self.step
-            self.direction = direction
-        else:
-            if self.direction == "up":
-                self.coordinates[1] += self.step
-            elif self.direction == "right":
-                self.coordinates[0] += self.step
-            elif self.direction == "down":
-                self.coordinates[1] -= self.step
-            elif self.direction == "left":
-                self.coordinates[0] -= self.step
-
 
         for x in range(self.length):
             C = self.parts[x].getCoordinates()
             T = self.parts[x].getTarget()
-            if abs(C[0]-T[0]) < self.step and abs(C[1]-T[1]) < self.step:
+
+            if x == 0:
+                L = self.coordinates
+            else:
+                L = self.parts[x-1].getCoordinates()
+
+            if abs(C[0]-T[0]) < self.parts[x].getStep() and abs(C[1]-T[1]) < self.parts[x].getStep():
                 self.parts[x].setCoordinates(T)
+                C = self.parts[x].getCoordinates()
                 if x == 0:
                     self.parts[x].setTarget(self.coordinates)
                 else:
-                    self.parts[x].setTarget(self.parts[x-1].getCoordinates())
+                    self.parts[x].setTarget([self.parts[x-1].getCoordinates()[0], self.parts[x-1].getCoordinates()[1]])
                 T = self.parts[x].getTarget()
-                if abs(C[0]-T[0]) < self.parts[x].getSize()/2 and abs(C[1]-T[1]) < self.parts[x].getSize()/2:
-                    self.parts[x].setStep(3)
-                else:
-                    self.parts[x].setStep(self.step)
-            if C[0] < T[0]:
-                self.parts[x].move('right')
-            elif C[0] > T[0]:
-                self.parts[x].move('left')
-            elif C[1] < T[1]:
-                self.parts[x].move('up')
+
+            #changes speed to remove gaps and overlaps
+            if abs(C[0]-L[0]) < self.parts[x].getSize() and abs(C[1]-L[1]) < self.parts[x].getSize():
+                self.parts[x].setStep(self.step / 2)
+            elif abs(C[0]-L[0]) > self.parts[x].getSize() or abs(C[1]-L[1]) > self.parts[x].getSize():
+                self.parts[x].setStep(self.step * 2)
             else:
-                self.parts[x].move('down')
+                self.parts[x].setStep(self.step)
+
+            #check for whether a part is within 1 step of an adjacent part
+            if C[0] < T[0] and abs(C[0]-T[0]) >= self.parts[x].getStep():
+                self.parts[x].move("right")
+            elif C[0] > T[0] and abs(C[0]-T[0]) >= self.parts[x].getStep():
+                self.parts[x].move("left")
+            elif C[1] < T[1] and abs(C[1]-T[1]) >= self.parts[x].getStep():
+                self.parts[x].move("up")
+            else:
+                self.parts[x].move("down")
 
 
     def eat(self, pellet):
