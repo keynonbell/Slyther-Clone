@@ -17,8 +17,8 @@ class game:
         self.colors = ["blue", "red", "yellow", "lime green", "purple", "pink", "orange", "cyan"]
         self.snakeSize = 50
         self.pelletSize = 10
-        self.minPellets = 10000
-        self.startingSnakes = 20
+        self.minPellets = 15000
+        self.startingSnakes = 201
         self.restartGame()
 
     def getNumSnakes(self):
@@ -56,13 +56,15 @@ class game:
             playerX = self.snakes[0].getCoordinates()[0]
             playerY = self.snakes[0].getCoordinates()[1]
             windowSnake = snakeHead(self.windowSize / 2, "blue", [playerX, playerY])
-            if self.snakes[x].checkOverlap(windowSnake) == False: # does not overlap with window, don't move this snake
+            # if the snake does not overlap with window, don't move this snake
+            if self.snakes[x].checkOverlap(windowSnake) == False:
                 continue
-
+            #AI snakes move at random
             if x != 0:
                 self.snakes[x].setDirection(random.choice(self.directions))
             self.snakes[x].move()
 
+            #deletes eaten pellets and adds points to the snake toward growing
             for pellet in self.pellets:
                 if self.snakes[x].eat(pellet) == True:
                     self.pellets.remove(pellet)
@@ -70,6 +72,7 @@ class game:
                     if x == 0:
                         self.pelletsEaten += 1
 
+            #ends game if overlaping a snake
             for i in range(self.numSnakes):
                 if x != i and x < len(self.snakes) and i < len(self.snakes):
                     if self.snakes[i].checkOverlap(windowSnake) == False:
@@ -95,11 +98,12 @@ class game:
         return self.pellets
 
     def createSnake(self, numSnakes):
+        #this should make your snake, and then make random AI snakes of arbitrary length
         if self.numSnakes == 0:
             newLen = 0
         else:
             newLen = random.randint(30, 100)
-        self.snakes.append(snakeHead(self.snakeSize, random.choice(self.colors), [self.gridLength/2, self.gridLength/2], self.step, length=newLen))
+        self.snakes.append(snakeHead(self.snakeSize, random.choice(self.colors), [self.gridLength/2, self.gridLength/2], self.step, newLen))
         self.numSnakes += 1
         for x in range(2, numSnakes):
             newCoordinates = [random.choice(range(self.snakeSize, self.gridLength - self.snakeSize)), random.choice(range(self.snakeSize, self.gridLength - self.snakeSize))]

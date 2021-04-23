@@ -4,6 +4,15 @@ from pellet import *
 
 class snakePart:
     def __init__(self, size, color, coordinates, step=1, direction="up"):
+        '''
+
+        :param size: size of the snake parts (constant)
+        :param color: color of the snake parts in one snake (constant)
+        :param coordinates: the current coordinates of the snake part
+        :param step: how far the snake part moves (default=1 grid block)
+        :param direction: the direction the part is moving (default = up)
+        :param target: the location where the snake part wants to move
+        '''
         self.size = size
         self.color = color
         self.coordinates = coordinates
@@ -25,6 +34,7 @@ class snakePart:
     def getStep(self):
         return self.step
 
+    #moves the snake parts based on the direction they are given by the head and the part in front of them
     def move(self, direction):
         if direction == "up":
             self.coordinates[1] += self.step
@@ -62,6 +72,7 @@ class snakePart:
         self.coordinates[0] = coordinates[0]
         self.coordinates[1] = coordinates[1]
 
+    #checks if snake parts are overlaping with snake heads
     def checkOverlap(self, minX, minY, maxX, maxY):
         myMinX = self.coordinates[0] - self.size / 2
         myMinY = self.coordinates[1] - self.size / 2
@@ -86,6 +97,14 @@ class snakePart:
 
 class snakeHead:
     def __init__(self, size, color, coordinates, step=1, direction='up', length=0):
+        '''
+        :param size: size of the snake head (constant)
+        :param color: color of the snake head (constant)
+        :param coordinates: the current coordinates of the snake head
+        :param step: how far the snake head moves (default=1 grid block)
+        :param direction: the direction the part is moving (default = up)
+        :param length: how many snake parts are attached to the head
+        '''
         self.size = size
         self.color = color
         self.coordinates = coordinates
@@ -94,9 +113,11 @@ class snakeHead:
         self.parts = []
         self.length = length
         self.points = 0
+
         if self.length != 0:
             self.grow(self.length)
 
+    #dimensions of the snake head
     def getDimensions(self):
         myMinX = self.coordinates[0] - self.size / 2
         myMinY = self.coordinates[1] - self.size / 2
@@ -133,11 +154,12 @@ class snakeHead:
     def getDirection(self):
         return self.direction
 
+    #check to make sure you can't move in the opposite direction (if traveling right, you can't turn left)
     def setDirection(self, newDirection):
         if newDirection != self.oppositeDirection(self.direction):
             self.direction = newDirection
 
-
+    #checks for heads overlapping heads and heads overlapping parts
     def checkOverlap(self, enemyHead):
         enemyMinX = enemyHead.coordinates[0] - (enemyHead.length + 1) * enemyHead.size
         enemyMaxX = enemyHead.coordinates[0] + (enemyHead.length + 1) * enemyHead.size
@@ -153,8 +175,11 @@ class snakeHead:
                     return True
         return False
 
+
+    #this is the function that does the heavy lifting for getting the snake head and parts to move correctly
     def move(self):
 
+        #constantly updates coordinates
         if self.direction == "up":
             self.coordinates[1] += self.step
         elif self.direction == "right":
@@ -164,6 +189,8 @@ class snakeHead:
         elif self.direction == "left":
             self.coordinates[0] -= self.step
 
+        #this for loop is responsible for making sure snake parts follow the snake head, and the parts in front of them
+        #it is also responsible for making sure the parts are properly spaced from eachother, and stopping them from getting stuck in place
         for x in range(self.length):
             C = self.parts[x].getCoordinates()
             T = self.parts[x].getTarget()
@@ -202,11 +229,17 @@ class snakeHead:
 
 
     def eat(self, pellet):
+        '''
+        :param pellet: a random pellet on the board
+        :return: returns true if the pellet is successfully eaten
+        '''
         dims = self.getDimensions()
         if not pellet.checkOverlap(dims[0],dims[1],dims[2],dims[3]):
             return False
+        #if the pellet color is the same as your snake color, you instantly grow a part
         if self.color == pellet.getColor():
             self.points += 5
+        #all other color pellets give you 1 point toward growing (need at least 3 points to grow)
         else:
             self.points += 1
         if self.points >= 6:
@@ -218,6 +251,12 @@ class snakeHead:
         return True
 
     def grow(self, parts=1):
+        '''
+        :param parts: snake part that gets added onto the end of the snake
+        '''
+        #This for loop is responsible for growing snakes by adding snake parts onto the end of the snake
+        #It checks the last direction the previous part was moving in to make sure the new part is added onto the end of the
+        #snake and is moving in the last known direction
         for x in range(parts):
             if self.length == 0:
                 lastItem = self.coordinates
